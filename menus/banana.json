@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle banana",
+        "command": "banana:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "banana",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "banana:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
