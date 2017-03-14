@@ -21,11 +21,11 @@ function id(node: ESTree.Node): string {
 
 export class Jst {
     index: {string: ESTree.Node};
-    parent: {};
+    parentId: {};
 
     constructor() {
         this.index = {} as {string: ESTree.Node};
-        this.parent = {};
+        this.parentId = {};
     }
 
     parse(src: string, option): boolean {
@@ -34,7 +34,7 @@ export class Jst {
             let _id = id(node);
             this.index[_id] = node;
             if (parentId) {
-                this.parent[_id] = parentId;
+                this.parentId[_id] = parentId;
             }
             flatten(ramda.values(node).map(v => v instanceof Array ? v : [v]))
             .filter(isNode)
@@ -42,7 +42,7 @@ export class Jst {
         }
         try {
             this.index = {} as {string: ESTree.Node};
-            this.parent = {};
+            this.parentId = {};
             let ast = esprima.parse(src, ramda.assoc('loc', true, option));
             ast.body.forEach(n => idx(n, null));
             return true;
@@ -57,7 +57,7 @@ export class Jst {
 
     ancestors(node: ESTree.Node): ESTree.Node[] {
         /** 從近到遠 */
-        let pid = this.parent[id(node)];
+        let pid = this.parentId[id(node)];
         if (pid) {
             return [this.index[pid]].concat(this.ancestors(this.index[pid]));
         } else {
