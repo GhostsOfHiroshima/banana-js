@@ -4,6 +4,48 @@ import * as ramda from 'ramda';
 import * as fs from 'fs';
 import * as esprima from 'esprima';
 import * as ESTree from 'estree';
+import {Optional} from './types';
+
+/*
+object:
+* {xxx: 'xxx'}
+* method body
+* class body
+* class instance
+
+identifier.from => identifier | object | expression | value | unknown (左值才有 from)
+* function a() {}    a.from === method body
+* class A {};        A.from === class body
+* let a = A;         a.from === A identifier
+* let a = A;         A.from === null
+* let a = b+c;       b.from === null
+* let a = new A();   a.from === expression
+* let a = b();       a.from === expression
+* let a = 1+2+3;     a.from === expression
+* let a = 'a';       a.from === value
+* function x(a) {}   a.from === unknown
+
+
+identifier.belongTo => identifier | object | expression | value
+ * a.b.c:          c.belongTo === b identifier
+ * A.b:            b.belongTo === A identifier
+ * (new A()).b:    b.belongTo === expression
+ * a().b           b.belongTo === expression
+ * (1+2+3).b       b.belongTo === expression
+ * 'xx'.b          b.belongTo === value
+
+expression.value => object | unknown
+* new A()    value === class instance
+* a()        value === unknown
+* 1+2+3      value === unknown
+
+const A = require('a');
+let a = new A();
+(new A()).m1();
+a.m1();
+A.sm1();
+A.setting.lang = 'en';
+*/
 
 function flatten<T>(listOfLists: T[][]): T[] {
     return listOfLists.reduce((results, i) => results.concat(i), []);
@@ -63,6 +105,11 @@ export class Jst {
         } else {
             return [];
         }
+    }
+
+    parent(node: ESTree.Node): Optional<ESTree.Node> {
+        let pid = this.parentId[id(node)];
+        return Optional.of(pid ? this.index[pid] : null);
     }
 }
 
