@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as esprima from 'esprima';
 import * as ESTree from 'estree';
 import {Optional} from './types';
+import * as INode from './type/node';
 
 /*
 object:
@@ -51,16 +52,6 @@ function flatten<T>(listOfLists: T[][]): T[] {
     return listOfLists.reduce((results, i) => results.concat(i), []);
 }
 
-function isNode(node) {
-    return node && node.type && typeof(node.type) === 'string';
-}
-
-function id(node: ESTree.Node): string {
-    let s = node.loc.start;
-    let e = node.loc.end;
-    return `${node.type}:${s.line}:${s.column}:${e.line}:${e.column}`;
-}
-
 export class Jst {
     index: {string: ESTree.Node};
     parentId: {};
@@ -73,13 +64,13 @@ export class Jst {
     parse(src: string, option): boolean {
         const idx = (node: ESTree.Node, parentId: string) => {
             // 要用 this，所以必須用 arrow function
-            let _id = id(node);
+            let _id = INode.id(node);
             this.index[_id] = node;
             if (parentId) {
                 this.parentId[_id] = parentId;
             }
             flatten(ramda.values(node).map(v => v instanceof Array ? v : [v]))
-            .filter(isNode)
+            .filter(INode.isa)
             .forEach(n => idx(n, _id));
         }
         try {
@@ -99,7 +90,7 @@ export class Jst {
 
     ancestors(node: ESTree.Node): ESTree.Node[] {
         /** 從近到遠 */
-        let pid = this.parentId[id(node)];
+        let pid = this.parentId[INode.id(node)];
         if (pid) {
             return [this.index[pid]].concat(this.ancestors(this.index[pid]));
         } else {
@@ -108,7 +99,7 @@ export class Jst {
     }
 
     parent(node: ESTree.Node): Optional<ESTree.Node> {
-        let pid = this.parentId[id(node)];
+        let pid = this.parentId[INode.id(node)];
         return Optional.of(pid ? this.index[pid] : null);
     }
 }
