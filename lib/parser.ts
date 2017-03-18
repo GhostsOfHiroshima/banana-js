@@ -18,6 +18,7 @@ identifier.from => identifier | object | expression | value | unknown (左值才
 * function a() {}    a.from === method body
 * class A {};        A.from === class body
 * let a = A;         a.from === A identifier
+* let a = b.c;       a.from === c identifier
 * let a = A;         A.from === null
 * let a = b+c;       b.from === null
 * let a = new A();   a.from === expression
