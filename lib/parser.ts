@@ -7,6 +7,7 @@ import * as ESTree from 'estree';
 import {Optional} from './types';
 import * as INode from './type/node';
 import * as Scope from './type/scope';
+import * as Identifier from './type/identifier';
 
 /*
 object:
