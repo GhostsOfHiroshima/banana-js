@@ -84,7 +84,7 @@ function findDeclaration(jst: Jst, identifier: Identifier): Optional<Identifier>
             if (result.is_present()) {
                 return result;
             } else {
-                return Optional.of(ramda.head(Scope.identifiers(jst, scope).filter(i => isDeclaration(jst, i))));
+                return Optional.of(ramda.head(Scope.identifiers(jst, scope).filter(i => i.name === identifier.name && isDeclaration(jst, i))));
             }
         }, Optional.empty());
     }
@@ -109,10 +109,10 @@ function definition(jst: Jst, declaration: Identifier): Optional<Node> {
     });
 }
 
-function findDefinition(jst: Jst, identifier: Identifier): Optional<Node> {
+export function findDefinition(jst: Jst, identifier: Identifier): Optional<Node> {
     if (isProperty(jst, identifier)) {
         let types = ['ObjectExpression', 'ClassDeclaration', 'NewExpression']
-        let a = propertyHost(jst, identifier)
+        return propertyHost(jst, identifier)
         .chain(host => {
             if (host.type === 'Identifier') {
                 return findDefinition(jst, host);
@@ -155,6 +155,8 @@ function findDefinition(jst: Jst, identifier: Identifier): Optional<Node> {
                     } else {
                         return Optional.of(def);
                     }
+                } else if (def.type === 'Identifier') {
+                    return findDefinition(jst, def);
                 } else {
                     return Optional.of(def);
                 }

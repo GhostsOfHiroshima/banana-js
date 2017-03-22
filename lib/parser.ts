@@ -80,7 +80,7 @@ export class Jst {
             this.index = {} as {string: ESTree.Node};
             this.parentId = {};
             let ast = esprima.parse(src, ramda.assoc('loc', true, option));
-            ast.body.forEach(n => idx(n, null));
+            idx(ast, null);
             return true;
         } catch (e) {
             return false;
