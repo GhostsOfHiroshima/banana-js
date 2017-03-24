@@ -1,12 +1,11 @@
 import * as ramda from 'ramda';
 import {Node, Literal, Identifier, MemberExpression, ObjectExpression, FunctionDeclaration, ClassDeclaration, MethodDefinition, VariableDeclaration} from 'estree';
 import {Optional} from '../types';
-import {Jst} from '../parser';
 import * as Scope from './scope';
-import * as INode from './node';
+import {parent} from './node';
 
-export function propertyHost(jst: Jst, node: Identifier): Optional<Node> {
-    return jst.parent(node)
+export function propertyHost(node: Identifier): Optional<Node> {
+    return parent(node)
     .map(parent => {
         if (parent.type === 'MemberExpression' && parent.property === node) {
             return parent.object;
@@ -16,8 +15,8 @@ export function propertyHost(jst: Jst, node: Identifier): Optional<Node> {
     });
 }
 
-export function isProperty(jst: Jst, node: Identifier): boolean {
-    return propertyHost(jst, node).is_present();
+export function isProperty(node: Identifier): boolean {
+    return propertyHost(node).is_present();
 }
 
 export function property(propertyName: string, node: ObjectExpression): Optional<Node> {
@@ -67,31 +66,31 @@ let aa = a;
 definition(aa);    ===> 1 + 2;
 */
 
-function isDeclaration(jst: Jst, identifier: Identifier): boolean {
+function isDeclaration(identifier: Identifier): boolean {
     const types = ['VariableDeclarator', 'FunctionDeclaration', 'ClassDeclaration'];
-    return jst.parent(identifier)
+    return parent(identifier)
     .map(parent =>
         (types.some(t => parent.type === t) && (parent as any).id === identifier) ||
         (parent.type === 'FunctionDeclaration' && parent.params.some(p => p === identifier)))
     .or_else(false);
 }
 
-function findDeclaration(jst: Jst, identifier: Identifier): Optional<Identifier> {
-    if (isDeclaration(jst, identifier)) {
+function findDeclaration(identifier: Identifier): Optional<Identifier> {
+    if (isDeclaration(identifier)) {
         return Optional.of(identifier);
     } else {
-        return Scope.scopes(jst, identifier).reduce((result, scope) => {
+        return Scope.scopes(identifier).reduce((result, scope) => {
             if (result.is_present()) {
                 return result;
             } else {
-                return Optional.of(ramda.head(Scope.identifiers(jst, scope).filter(i => i.name === identifier.name && isDeclaration(jst, i))));
+                return Optional.of(ramda.head(Scope.identifiers(scope).filter(i => i.name === identifier.name && isDeclaration(i))));
             }
         }, Optional.empty());
     }
 }
 
-function definition(jst: Jst, declaration: Identifier): Optional<Node> {
-    return jst.parent(declaration)
+function definition(declaration: Identifier): Optional<Node> {
+    return parent(declaration)
     .map(parent => {
         if (parent.type === 'FunctionDeclaration') {
             if (parent.id === declaration) {
@@ -109,13 +108,13 @@ function definition(jst: Jst, declaration: Identifier): Optional<Node> {
     });
 }
 
-export function findDefinition(jst: Jst, identifier: Identifier): Optional<Node> {
-    if (isProperty(jst, identifier)) {
+export function findDefinition(identifier: Identifier): Optional<Node> {
+    if (isProperty(identifier)) {
         let types = ['ObjectExpression', 'ClassDeclaration', 'NewExpression']
-        return propertyHost(jst, identifier)
+        return propertyHost(identifier)
         .chain(host => {
             if (host.type === 'Identifier') {
-                return findDefinition(jst, host);
+                return findDefinition(host);
             } else if (ramda.contains(host.type, types)) {
                 return Optional.of(host);
             } else {
@@ -129,7 +128,7 @@ export function findDefinition(jst: Jst, identifier: Identifier): Optional<Node>
                 return method(identifier.name, hostDef, true);
             } else if (hostDef.type === 'NewExpression') {
                 if (hostDef.callee.type === 'Identifier') {
-                    return findDefinition(jst, hostDef.callee)
+                    return findDefinition(hostDef.callee)
                     .chain(d => {
                         if (d.type === 'ClassDeclaration') {
                             return method(identifier.name, d, false);
@@ -145,18 +144,18 @@ export function findDefinition(jst: Jst, identifier: Identifier): Optional<Node>
             }
         });
     } else {
-        return findDeclaration(jst, identifier)
+        return findDeclaration(identifier)
         .chain(declaration => {
-            return definition(jst, declaration)
+            return definition(declaration)
             .chain(def => {
                 if (def.type === 'MemberExpression') {
                     if (def.property.type === 'Identifier') {
-                        return findDefinition(jst, def.property);
+                        return findDefinition(def.property);
                     } else {
                         return Optional.of(def);
                     }
                 } else if (def.type === 'Identifier') {
-                    return findDefinition(jst, def);
+                    return findDefinition(def);
                 } else {
                     return Optional.of(def);
                 }

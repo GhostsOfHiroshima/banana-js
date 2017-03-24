@@ -1,8 +1,7 @@
 import * as ramda from 'ramda';
 import {Node, Identifier, FunctionDeclaration} from 'estree';
 import {Optional} from '../types';
-import {Jst} from '../parser';
-import * as INode from './node';
+import {parent, ancestors, isa as isNode} from './node';
 
 /**
 大部份 scope 只是單純的 block。例如 if {...}, class {...}
@@ -14,29 +13,29 @@ scope 裡的 identifiers 原則上是屬於這個 scope 的，但也有例外，
 */
 
 type ScopeType = {
-    isScope: (jst: Jst, node: Node) => boolean,
-    willBan: (jst: Jst, node: Node) => boolean,
+    isScope: (node: Node) => boolean,
+    willBan: (node: Node) => boolean,
 
     // 在這個 scope 底下，但不屬於這個 scope 的 identifiers
-    outerIdentifiers: (jst: Jst, scope: Node) => Identifier[],
+    outerIdentifiers: (scope: Node) => Identifier[],
 }
 
 const functionScopeType: ScopeType = {
-    isScope: (jst, node) => node.type === 'FunctionDeclaration',
-    willBan: (jst, node) => jst.parent(node).map(parent => parent.type === 'FunctionDeclaration').or_else(false),
-    outerIdentifiers: (jst, scope) => [(scope as FunctionDeclaration).id],
+    isScope: node => node.type === 'FunctionDeclaration',
+    willBan: node => parent(node).map(parent => parent.type === 'FunctionDeclaration').or_else(false),
+    outerIdentifiers: scope => [(scope as FunctionDeclaration).id],
 }
 
 const forScopeType: ScopeType = {
-    isScope: (jst, node) => node.type === 'ForStatement',
-    willBan: (jst, node) => jst.parent(node).map(parent => parent.type === 'ForStatement').or_else(false),
-    outerIdentifiers: (jst, scope) => [],
+    isScope: node => node.type === 'ForStatement',
+    willBan: node => parent(node).map(parent => parent.type === 'ForStatement').or_else(false),
+    outerIdentifiers: scope => [],
 }
 
 const defaultScopeType: ScopeType = {
-    isScope: (jst, node) => ['Program', 'BlockStatement', 'ClassBody'].some(t => node.type === t),
-    willBan: (jst, node) => false,
-    outerIdentifiers: (jst, scope) => [],
+    isScope: node => ['Program', 'BlockStatement', 'ClassBody'].some(t => node.type === t),
+    willBan: node => false,
+    outerIdentifiers: scope => [],
 }
 
 const scopeTypes = [
@@ -45,36 +44,36 @@ const scopeTypes = [
     defaultScopeType,
 ];
 
-export function getScopeType(jst: Jst, node: Node): Optional<ScopeType> {
-    if (scopeTypes.some(i => i.willBan(jst, node))) {
+export function getScopeType(node: Node): Optional<ScopeType> {
+    if (scopeTypes.some(i => i.willBan(node))) {
         return Optional.empty();
     } else {
-        let candidates = scopeTypes.filter(i => i.isScope(jst, node));
+        let candidates = scopeTypes.filter(i => i.isScope(node));
         return Optional.of(ramda.head(candidates));
     }
 }
 
-export function isScope(jst: Jst, node: Node): boolean {
-    return getScopeType(jst, node).is_present();
+export function isScope(node: Node): boolean {
+    return getScopeType(node).is_present();
 }
 
-export function scopes(jst: Jst, identifier: Identifier): Node[] {
-    return jst.ancestors(identifier).filter(node => isScope(jst, node));
+export function scopes(identifier: Identifier): Node[] {
+    return ancestors(identifier).filter(node => isScope(node));
 }
 
-export function identifiers(jst: Jst, node: Node): Identifier[] {
+export function identifiers(node: Node): Identifier[] {
     /** 查出這個 Node 下面所有的 identifiers，不包含子 Scope 底下的 */
     let children = ramda.flatten(ramda.values(node).map(v => v instanceof Array ? v : [v]))
-    .filter(INode.isa) as Node[];
+    .filter(isNode) as Node[];
 
     return children.reduce((result, child) => {
         if (child.type === 'Identifier') {
             return result.concat([child]);
-        } else if (isScope(jst, child)) {
+        } else if (isScope(child)) {
             // 遇到子 scope 就不往下追了。但要子 scope 吐出屬於本層的 identifiers
-            return result.concat(getScopeType(jst, child).map(type => type.outerIdentifiers(jst, child)).or_else([]));
+            return result.concat(getScopeType(child).map(type => type.outerIdentifiers(child)).or_else([]));
         } else {
-            return result.concat(identifiers(jst, child));
+            return result.concat(identifiers(child));
         }
     }, [] as Identifier[]);
 }

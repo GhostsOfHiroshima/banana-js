@@ -5,6 +5,8 @@
         "module": "commonjs"
     },
     "files": [
-        "lib/parser.ts"
+        "lib/type/node.ts",
+        "lib/type/scope.ts",
+        "lib/type/identifier.ts"
     ]
 }
