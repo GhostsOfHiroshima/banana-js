@@ -1,39 +1,9 @@
 import * as ramda from 'ramda';
-import {Node, Literal, Identifier, MemberExpression, ObjectExpression, FunctionDeclaration, ClassDeclaration, MethodDefinition, VariableDeclaration} from 'estree';
+import {Node, Identifier} from 'estree';
 import {Optional} from '../types';
 import * as Scope from './scope';
 import {parent} from './node';
-
-export function propertyHost(node: Identifier): Optional<Node> {
-    return parent(node)
-    .map(parent => {
-        if (parent.type === 'MemberExpression' && parent.property === node) {
-            return parent.object;
-        } else {
-            return null;
-        }
-    });
-}
-
-export function isProperty(node: Identifier): boolean {
-    return propertyHost(node).is_present();
-}
-
-export function property(propertyName: string, node: ObjectExpression): Optional<Node> {
-    return Optional.of(ramda.head(node.properties
-    .filter(p =>
-        (p.key.type === 'Literal' && p.key.value === propertyName) ||
-        (p.key.type === 'Identifier' && p.key.name === propertyName))
-    .map(p => p.value)));
-}
-
-export function method(methodName: string, node: ClassDeclaration, isStatic: boolean): Optional<MethodDefinition> {
-    return Optional.of(ramda.head(node.body.body.filter(m =>
-        m.key.type === 'Identifier' &&
-        m.key.name === methodName &&
-        m.static === isStatic
-    )));
-}
+import * as property from './property';
 
 /**
 ### declaration
@@ -109,40 +79,16 @@ function definition(declaration: Identifier): Optional<Node> {
 }
 
 export function findDefinition(identifier: Identifier): Optional<Node> {
-    if (isProperty(identifier)) {
-        let types = ['ObjectExpression', 'ClassDeclaration', 'NewExpression']
-        return propertyHost(identifier)
+    if (property.isa(identifier)) {
+        return property.host(identifier)
         .chain(host => {
             if (host.type === 'Identifier') {
                 return findDefinition(host);
-            } else if (ramda.contains(host.type, types)) {
-                return Optional.of(host);
             } else {
-                return Optional.empty() as Optional<Node>;
+                return Optional.of(host);
             }
         })
-        .chain(hostDef => {
-            if (hostDef.type === 'ObjectExpression') {
-                return property(identifier.name, hostDef);
-            } else if (hostDef.type === 'ClassDeclaration') {
-                return method(identifier.name, hostDef, true);
-            } else if (hostDef.type === 'NewExpression') {
-                if (hostDef.callee.type === 'Identifier') {
-                    return findDefinition(hostDef.callee)
-                    .chain(d => {
-                        if (d.type === 'ClassDeclaration') {
-                            return method(identifier.name, d, false);
-                        } else {
-                            return Optional.empty();
-                        }
-                    });
-                } else {
-                    return Optional.empty();
-                }
-            } else {
-                return Optional.empty();
-            }
-        });
+        .chain(host => property.value(identifier.name, host));
     } else {
         return findDeclaration(identifier)
         .chain(declaration => {
