@@ -3,6 +3,7 @@ import {Node, Identifier} from 'estree';
 import {Optional} from '../types';
 import {parent} from './node';
 import {findDefinition} from './identifier';
+import * as commonjs from './module-type/commonjs';
 
 export function host(node: Identifier): Optional<Node> {
     return parent(node)
@@ -22,6 +23,8 @@ export function isa(node: Identifier): boolean {
 type ValueGetter = (propertyName: string, host: Node) => Optional<Node>;
 
 const valueGetters: ValueGetter[] = [
+    commonjs.propertyValueGetter,
+
     (propertyName, host) => {
         if (host.type === 'ObjectExpression') {
             let ps = host.properties.filter(p =>

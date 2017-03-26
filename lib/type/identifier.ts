@@ -4,6 +4,7 @@ import {Optional} from '../types';
 import * as Scope from './scope';
 import {parent} from './node';
 import * as property from './property';
+import * as commonjs from './module-type/commonjs';
 
 /**
 ### declaration
@@ -37,12 +38,15 @@ definition(aa);    ===> 1 + 2;
 */
 
 function isDeclaration(identifier: Identifier): boolean {
-    const types = ['VariableDeclarator', 'FunctionDeclaration', 'ClassDeclaration'];
-    return parent(identifier)
-    .map(parent =>
-        (types.some(t => parent.type === t) && (parent as any).id === identifier) ||
-        (parent.type === 'FunctionDeclaration' && parent.params.some(p => p === identifier)))
-    .or_else(false);
+    type Checker = (identifier: Identifier) => boolean;
+    const checkers: Checker[] = [
+        identifier => parent(identifier).map(p => p.type === 'VariableDeclarator' && p.id === identifier).or_else(false),
+        identifier => parent(identifier).map(p => p.type === 'ClassDeclaration' && p.id === identifier).or_else(false),
+        identifier => parent(identifier).map(p => p.type === 'FunctionDeclaration' && p.id === identifier).or_else(false),
+        identifier => parent(identifier).map(p => p.type === 'FunctionDeclaration' && p.params.some(i => i === identifier)).or_else(false),
+        commonjs.isDeclaration,
+    ];
+    return checkers.some(chk => chk(identifier));
 }
 
 function findDeclaration(identifier: Identifier): Optional<Identifier> {
@@ -60,22 +64,33 @@ function findDeclaration(identifier: Identifier): Optional<Identifier> {
 }
 
 function definition(declaration: Identifier): Optional<Node> {
-    return parent(declaration)
-    .map(parent => {
-        if (parent.type === 'FunctionDeclaration') {
-            if (parent.id === declaration) {
-                return parent;
-            } else {
-                return null;
-            }
-        } else if (parent.type === 'VariableDeclarator') {
-            return parent.init;
-        } else if (parent.type === 'ClassDeclaration') {
-            return parent;
+    type Resolver = (declaration: Identifier) => Optional<Node>;
+    const resolvers: Resolver[] = [
+        commonjs.definition,
+        identifier => {
+            return parent(identifier).map(p => {
+                if (p.type === 'FunctionDeclaration') {
+                    if (p.id === declaration) {
+                        return p;
+                    } else {
+                        return null;        // 函式參數沒有 definition
+                    }
+                } else {
+                    return null;
+                }
+            });
+        },
+        identifier => parent(identifier).map(p => p.type === 'VariableDeclarator' ? p.init : null),
+        identifier => parent(identifier).map(p => p.type === 'ClassDeclaration' ? p : null),
+    ];
+
+    return resolvers.reduce((result, resolver) => {
+        if (result.is_present()) {
+            return result;
         } else {
-            throw new Error(`wrong type`);
+            return resolver(declaration);
         }
-    });
+    }, Optional.empty());
 }
 
 export function findDefinition(identifier: Identifier): Optional<Node> {
