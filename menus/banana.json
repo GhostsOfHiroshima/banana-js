@@ -4,6 +4,10 @@
       {
         "label": "Toggle banana",
         "command": "banana:toggle"
+      },
+      {
+        "label": "gotoDeclaration",
+        "command": "banana:gotoDeclaration"
       }
     ]
   },
@@ -17,6 +21,10 @@
             {
               "label": "Toggle",
               "command": "banana:toggle"
+            },
+            {
+              "label": "gotoDeclaration",
+              "command": "banana:gotoDeclaration"
             }
           ]
         }
