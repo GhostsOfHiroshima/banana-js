@@ -77,6 +77,10 @@ export function propertyValueGetter(propertyName: string, host: Node): Optional<
          (p.property.type === 'Literal' && p.property.value === propertyName)))
         .or_else(false))
     .filter(i => parent(i).chain(parent).map(i => i.type === 'AssignmentExpression' && i.left === parent(i).or_else(null)))
-    .map(i => parent(i).chain(parent).map(i => (i as AssignmentExpression).right));
+    .map(i =>
+        parent(i)
+        .chain(parent)
+        .map(i => (i as AssignmentExpression).right)
+        .chain(v => v.type === 'Identifier' ? findDefinition(v) : Optional.of(v)));
     return Optional.of(ramda.head(Optional.cat(values)));
 }
