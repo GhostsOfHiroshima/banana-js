@@ -4,6 +4,7 @@ import {Node} from 'estree';
 import {Optional} from '../types';
 
 const parentField = '_parent';
+const pathField = '_path';
 
 export function isa(node) {
     return node && node.type && typeof(node.type) === 'string';
@@ -30,7 +31,7 @@ export function descendants(node: Node): Node[] {
     return ramda.flatten(children(node).map(child => [child].concat(descendants(child))));
 }
 
-export function parse(src: string, option: {}): Optional<Node> {
+export function parse(src: string, path: Optional<string>, option: {}): Optional<Node> {
     const defaultOpt = {
         sourceType: 'module',
         loc: true,
@@ -42,6 +43,7 @@ export function parse(src: string, option: {}): Optional<Node> {
     try {
         let ast = esprima.parse(src, ramda.merge(defaultOpt, option));
         setParent(ast, Optional.empty());
+        ast[pathField] = path.or_else(null);
         return Optional.of(ast);
     } catch(e) {
         return Optional.empty();
