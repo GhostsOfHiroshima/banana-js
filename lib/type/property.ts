@@ -27,9 +27,11 @@ const valueGetters: ValueGetter[] = [
 
     (propertyName, host) => {
         if (host.type === 'ObjectExpression') {
-            let ps = host.properties.filter(p =>
+            let ps = host.properties
+            .filter(p =>
                 (p.key.type === 'Literal' && p.key.value === propertyName) ||
-                (p.key.type === 'Identifier' && p.key.name === propertyName));
+                (p.key.type === 'Identifier' && p.key.name === propertyName))
+            .map(p => p.value);
             return Optional.of(ramda.head(ps));
         } else {
             return Optional.empty();
@@ -68,6 +70,18 @@ const valueGetters: ValueGetter[] = [
             return Optional.empty();
         }
     },
+
+    (propertyName, host) => {
+        if (host.type === 'MemberExpression') {
+            if (host.property.type === 'Identifier') {
+                return findDefinition(host.property).chain(d => value(propertyName, d));
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return Optional.empty();
+        }
+    }
 ];
 
 export function value(propertyName: string, host: Node): Optional<Node> {
