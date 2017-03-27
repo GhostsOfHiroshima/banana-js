@@ -1,7 +1,7 @@
 import * as ramda from 'ramda';
 import * as esprima from 'esprima';
 import {Node} from 'estree';
-import {Optional} from '../types';
+import {Optional, Result} from '../types';
 
 const parentField = '_parent';
 const pathField = '_path';
@@ -31,7 +31,8 @@ export function descendants(node: Node): Node[] {
     return ramda.flatten(children(node).map(child => [child].concat(descendants(child))));
 }
 
-export function parse(src: string, path: Optional<string>, option: {}): Optional<Node> {
+type ParseError = {lineNumber: number, column: number, description: string};
+export function parse(src: string, path: Optional<string>, option: {}): Result<ParseError, Node> {
     const defaultOpt = {
         sourceType: 'module',
         loc: true,
@@ -44,8 +45,8 @@ export function parse(src: string, path: Optional<string>, option: {}): Optional
         let ast = esprima.parse(src, ramda.merge(defaultOpt, option));
         setParent(ast, Optional.empty());
         ast[pathField] = path.or_else(null);
-        return Optional.of(ast);
+        return Result.ok(ast);
     } catch(e) {
-        return Optional.empty();
+        return Result.fail(e);
     }
 }

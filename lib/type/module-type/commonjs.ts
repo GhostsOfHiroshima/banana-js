@@ -39,7 +39,8 @@ function resolve(expression: Node): Optional<Node> {
                 let srcPath = path.join(curDir, fpath.value as string) + '.js';
                 let src = fs.readFileSync(srcPath, 'utf-8');
                 return parse(src, Optional.of(srcPath), {})
-                .map(ast => moduleExport(ast).or_else(ast));
+                .map(ast => moduleExport(ast).or_else(ast))
+                .either(e => Optional.empty(), m => Optional.of(m));
             } else {
                 return Optional.empty();
             }
