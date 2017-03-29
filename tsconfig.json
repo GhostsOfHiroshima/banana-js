@@ -5,6 +5,7 @@
         "module": "commonjs"
     },
     "files": [
+        "lib/indicator-bar.ts",
         "lib/type/node.ts",
         "lib/type/scope.ts",
         "lib/type/property.ts",
