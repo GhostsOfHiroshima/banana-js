@@ -14,7 +14,7 @@ export function clear(editor) {
     indicatorBar(editor).innerHTML = '';
 }
 
-export function show(editor, screenPosition) {
+export function show(editor, screenPosition, color) {
     // 只處理單行 range (因為 identifier 只會有一行)
     // todo: 用 atom.views.getView(editor).component.domNodeValue.querySelector('.vertical-scrollbar')
     let row = screenPosition.row;
@@ -25,5 +25,6 @@ export function show(editor, screenPosition) {
     let indicator = document.createElement('div');
     indicator.classList.add('indicator');
     indicator.style.top = Math.round((row / rowCount) * displayHeight) + 'px';
+    indicator.style.borderTopColor = color;
     indicatorBar(editor).appendChild(indicator);
 }
