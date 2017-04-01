@@ -1,6 +1,5 @@
 import * as ramda from 'ramda';
-
-type AtomRange = [number, number];
+import {Range} from './base';
 
 export class MarkerManager {
     markerLayerOf = {};
@@ -9,7 +8,7 @@ export class MarkerManager {
         ramda.keys(this.markerLayerOf).forEach(k => this.markerLayerOf[k].clear());
     }
 
-    set(editor, clsName: string, ranges: AtomRange[]) {
+    set(editor, clsName: string, ranges: Range[]) {
         if (! this.markerLayerOf[clsName]) {
             this.markerLayerOf[clsName] = editor.addMarkerLayer();
         }
