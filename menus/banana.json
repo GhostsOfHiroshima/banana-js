@@ -2,10 +2,6 @@
   "context-menu": {
     "atom-text-editor": [
       {
-        "label": "Toggle banana",
-        "command": "banana:toggle"
-      },
-      {
         "label": "gotoDeclaration",
         "command": "banana:gotoDeclaration"
       }
@@ -18,10 +14,6 @@
         {
           "label": "banana",
           "submenu": [
-            {
-              "label": "Toggle",
-              "command": "banana:toggle"
-            },
             {
               "label": "gotoDeclaration",
               "command": "banana:gotoDeclaration"

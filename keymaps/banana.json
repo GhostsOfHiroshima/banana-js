@@ -1,5 +1,5 @@
 {
   "atom-workspace": {
-    "ctrl-alt-o": "banana:toggle"
+    "shift-alt-d": "banana:gotoDeclaration"
   }
 }
