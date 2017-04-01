@@ -2,7 +2,7 @@ import {Point} from './base';
 
 declare let atom;
 
-function indicatorBar(editor) {
+function indicatorBar(editor): HTMLElement {
     let bar = atom.views.getView(editor).component.domNodeValue.querySelector('.indicator-bar');
     if (! bar) {
         bar = document.createElement('div');
@@ -17,7 +17,9 @@ export function clearAll(editor) {
 }
 
 export function clear(editor, type) {
-    Array.from(indicatorBar(editor).children).forEach((i: any) => i.remove());
+    Array.from(indicatorBar(editor).children)
+    .filter(i => i.classList.contains(type))
+    .forEach(i => i.remove());
 }
 
 function show(editor, type: string, position: Point) {
