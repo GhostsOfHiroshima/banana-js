@@ -10,6 +10,13 @@ export class MarkerManager {
         indicatorBar.clearAll(editor);
     }
 
+    clear(editor, type: string) {
+        indicatorBar.clear(editor, type);
+        if (this.markerLayerOf[type]) {
+            this.markerLayerOf[type].clear();
+        }
+    }
+
     set(editor, type: string, ranges: Range[]) {
         if (! this.markerLayerOf[type]) {
             this.markerLayerOf[type] = editor.addMarkerLayer();

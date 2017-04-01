@@ -16,7 +16,7 @@ export function clearAll(editor) {
     indicatorBar(editor).innerHTML = '';
 }
 
-function clearType(editor, type) {
+export function clear(editor, type) {
     Array.from(indicatorBar(editor).children).forEach((i: any) => i.remove());
 }
 
@@ -35,6 +35,6 @@ function show(editor, type: string, position: Point) {
 }
 
 export function set(editor, type: string, positions: Point[]) {
-    clearType(editor, type);
+    clear(editor, type);
     positions.forEach(p => show(editor, type, p));
 }
