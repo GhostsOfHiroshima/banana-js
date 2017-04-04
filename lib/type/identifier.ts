@@ -2,7 +2,7 @@ import * as ramda from 'ramda';
 import {Node, Identifier} from 'estree';
 import {Optional} from '../types';
 import * as Scope from './scope';
-import {parent} from './node';
+import {parent, descendants} from './node';
 import * as property from './property';
 import * as commonjs from './module-type/commonjs';
 
@@ -123,4 +123,20 @@ export function findDefinition(identifier: Identifier): Optional<Node> {
             });
         });
     }
+}
+
+export function isVariable(node: Node) {
+    return node.type === 'Identifier' && (! property.isa(node));
+}
+
+export function occurences(variable: Identifier): Identifier[] {
+    return findDeclaration(variable)
+    .chain(d => {
+        return Optional.of(ramda.head(Scope.scopes(d)))
+        .map(scope => [scope].concat(descendants(scope).filter(Scope.isScope)))
+        .map(scopes => ramda.flatten(scopes.map(s => Scope.identifiers(s))))
+        .map(items => items.filter(i => i.name === variable.name && isVariable(i)))
+        .map(vars => vars.filter(v => findDeclaration(v).map(d2 => d2 === d).or_else(false)));
+    })
+    .or_else([]);
 }
