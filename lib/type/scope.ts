@@ -58,7 +58,10 @@ export function isScope(node: Node): boolean {
 }
 
 export function scopes(identifier: Identifier): Node[] {
-    return ancestors(identifier).filter(node => isScope(node));
+    return ancestors(identifier)
+    .filter(node => getScopeType(node)
+        .map(st => ! ramda.contains(identifier, st.outerIdentifiers(node)))
+        .or_else(false));
 }
 
 export function identifiers(node: Node): Identifier[] {
