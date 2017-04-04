@@ -26,6 +26,12 @@ const functionScopeType: ScopeType = {
     outerIdentifiers: scope => [(scope as FunctionDeclaration).id],
 }
 
+const arrowFunctionScopeType: ScopeType = {
+    isScope: node => node.type === 'ArrowFunctionExpression',
+    willBan: node => parent(node).map(parent => parent.type === 'ArrowFunctionExpression').or_else(false),
+    outerIdentifiers: scope => [],
+}
+
 const forScopeType: ScopeType = {
     isScope: node => node.type === 'ForStatement',
     willBan: node => parent(node).map(parent => parent.type === 'ForStatement').or_else(false),
@@ -40,6 +46,7 @@ const defaultScopeType: ScopeType = {
 
 const scopeTypes = [
     functionScopeType,
+    arrowFunctionScopeType,
     forScopeType,
     defaultScopeType,
 ];
