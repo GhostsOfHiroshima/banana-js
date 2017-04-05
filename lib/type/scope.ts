@@ -1,5 +1,5 @@
 import * as ramda from 'ramda';
-import {Node, Identifier, FunctionDeclaration} from 'estree';
+import {Node, Identifier, FunctionDeclaration, FunctionExpression} from 'estree';
 import {Optional} from '../types';
 import {parent, ancestors, isa as isNode} from './node';
 
@@ -26,6 +26,12 @@ const functionScopeType: ScopeType = {
     outerIdentifiers: scope => [(scope as FunctionDeclaration).id],
 }
 
+const functionExpressionScopeType: ScopeType = {
+    isScope: node => node.type === 'FunctionExpression',
+    willBan: node => parent(node).map(parent => parent.type === 'FunctionExpression').or_else(false),
+    outerIdentifiers: (scope: FunctionExpression) => scope.id ? [scope.id] : [],
+}
+
 const arrowFunctionScopeType: ScopeType = {
     isScope: node => node.type === 'ArrowFunctionExpression',
     willBan: node => parent(node).map(parent => parent.type === 'ArrowFunctionExpression').or_else(false),
@@ -46,6 +52,7 @@ const defaultScopeType: ScopeType = {
 
 const scopeTypes = [
     functionScopeType,
+    functionExpressionScopeType,
     arrowFunctionScopeType,
     forScopeType,
     defaultScopeType,

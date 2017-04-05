@@ -45,6 +45,7 @@ function isDeclaration(identifier: Identifier): boolean {
         identifier => parent(identifier).map(p => p.type === 'FunctionDeclaration' && p.id === identifier).or_else(false),
         identifier => parent(identifier).map(p => p.type === 'FunctionDeclaration' && p.params.some(i => i === identifier)).or_else(false),
         identifier => parent(identifier).map(p => p.type === 'ArrowFunctionExpression' && ramda.contains(identifier, p.params)).or_else(false),
+        identifier => parent(identifier).map(p => p.type === 'FunctionExpression' && ramda.contains(identifier, p.params)).or_else(false),
         commonjs.isDeclaration,
     ];
     return checkers.some(chk => chk(identifier));
