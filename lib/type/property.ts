@@ -4,6 +4,7 @@ import {Optional} from '../types';
 import {parent} from './node';
 import {findDefinition} from './identifier';
 import * as commonjs from './module-type/commonjs';
+import * as es6 from './module-type/es6';
 
 type HostGetter = (node: Identifier) => Optional<Node>;
 const hostGetters: HostGetter[] = [
@@ -59,6 +60,7 @@ type ValueGetter = (propertyName: string, host: Node) => Optional<Node>;
 
 const valueGetters: ValueGetter[] = [
     commonjs.propertyValueGetter,
+    es6.propertyValueGetter,
 
     (propertyName, host) => {
         if (host.type === 'ObjectExpression') {

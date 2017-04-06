@@ -5,6 +5,7 @@ import * as Scope from './scope';
 import {parent, descendants} from './node';
 import * as property from './property';
 import * as commonjs from './module-type/commonjs';
+import * as es6 from './module-type/es6';
 
 /**
 ### declaration
@@ -47,6 +48,7 @@ function isDeclaration(identifier: Identifier): boolean {
         identifier => parent(identifier).map(p => p.type === 'ArrowFunctionExpression' && ramda.contains(identifier, p.params)).or_else(false),
         identifier => parent(identifier).map(p => p.type === 'FunctionExpression' && ramda.contains(identifier, p.params)).or_else(false),
         commonjs.isDeclaration,
+        es6.isDeclaration,
     ];
     return checkers.some(chk => chk(identifier));
 }
@@ -69,6 +71,7 @@ function definition(declaration: Identifier): Optional<Node> {
     type Resolver = (declaration: Identifier) => Optional<Node>;
     const resolvers: Resolver[] = [
         commonjs.definition,
+        es6.definition,
         identifier => {
             return parent(identifier).map(p => {
                 if (p.type === 'FunctionDeclaration') {

@@ -1,10 +1,10 @@
 import * as ramda from 'ramda';
 import * as esprima from 'esprima';
-import {Node} from 'estree';
+import {Node, Program} from 'estree';
 import {Optional, Result} from '../types';
 
 const parentField = '_parent';
-const pathField = '_path';
+export const pathField = '_path';
 
 export function isa(node) {
     return node && node.type && typeof(node.type) === 'string';
@@ -32,7 +32,7 @@ export function descendants(node: Node): Node[] {
 }
 
 type ParseError = {lineNumber: number, column: number, description: string};
-export function parse(src: string, path: Optional<string>, option: {}): Result<ParseError, Node> {
+export function parse(src: string, path: Optional<string>, option: {}): Result<ParseError, Program> {
     const defaultOpt = {
         sourceType: 'module',
         loc: true,
