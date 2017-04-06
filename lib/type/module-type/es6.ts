@@ -95,5 +95,9 @@ export function definition(declaration: Identifier): Optional<Node> {
 }
 
 export function propertyValueGetter(propertyName: string, host: Node): Optional<Node> {
-    return Optional.empty();
+    if (host.type === 'Program') {
+        return getExport(host, propertyName);
+    } else {
+        return Optional.empty();
+    }
 }
