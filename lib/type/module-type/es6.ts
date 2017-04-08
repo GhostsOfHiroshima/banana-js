@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ramda from 'ramda';
-import {Node, Identifier, ImportDeclaration, Program, ExportNamedDeclaration} from 'estree';
+import {Node, Identifier, ImportDeclaration, Program, ExportNamedDeclaration, ExportDefaultDeclaration} from 'estree';
 import {Optional} from '../../types';
 import {parse, parent, ancestors, pathField} from '../node';
 import {findDefinition} from '../identifier';
@@ -68,7 +68,21 @@ function getExport(module: Program, exportName: string): Optional<Node> {
 }
 
 function getDefaultExport(module: Program): Optional<Node> {
-    return Optional.empty();
+    return Optional.of(ramda.head(module.body.filter(i => i.type === 'ExportDefaultDeclaration') as ExportDefaultDeclaration[]))
+    .map(ex => ex.declaration)
+    .chain(d => {
+        if (d.type === 'Identifier') {
+            return findDefinition(d);
+        } else if (d.type === 'AssignmentExpression') {
+            if (d.right.type === 'Identifier') {
+                return findDefinition(d.right);
+            } else {
+                return Optional.of(d.right);
+            }
+        } else {
+            return Optional.of(d);
+        }
+    });
 }
 
 export function definition(declaration: Identifier): Optional<Node> {
