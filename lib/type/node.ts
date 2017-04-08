@@ -36,6 +36,8 @@ export function parse(src: string, path: Optional<string>, option: {}): Result<P
     const defaultOpt = {
         sourceType: 'module',
         loc: true,
+        tolerant: true,
+        jsx: true,
     };
     function setParent(node: Node, parent: Optional<Node>): void {
         node[parentField] = parent;
