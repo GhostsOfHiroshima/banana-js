@@ -1,10 +1,10 @@
 {
-  "name": "banana",
+  "name": "banana-js",
   "main": "./lib/banana",
   "version": "0.0.0",
-  "description": "A short description of your package",
+  "description": "A JavaScript Editor enhancement",
   "keywords": [],
-  "repository": "https://github.com/atom/banana",
+  "repository": "https://github.com/leon740727/banana-js",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
