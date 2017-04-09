@@ -2,7 +2,7 @@
   "context-menu": {
     "atom-text-editor": [
       {
-        "label": "gotoDeclaration",
+        "label": "Jump to Declaration",
         "command": "banana:gotoDeclaration"
       }
     ]
@@ -15,7 +15,7 @@
           "label": "banana",
           "submenu": [
             {
-              "label": "gotoDeclaration",
+              "label": "Jump to Declaration",
               "command": "banana:gotoDeclaration"
             }
           ]
