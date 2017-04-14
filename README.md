@@ -10,7 +10,7 @@ apm install banana-js
 
 ### Features
 
-* jump to declaration of a method / class... (shift-alt-d)
+* jump to declaration of a method / class... (ctrl-d)
 
 ![Screenshot-1](https://github.com/leon740727/banana-js/blob/master/resources/screenshot-1.png?raw=true)
 
