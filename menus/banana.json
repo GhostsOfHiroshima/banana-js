@@ -12,7 +12,7 @@
       "label": "Packages",
       "submenu": [
         {
-          "label": "banana",
+          "label": "banana-js",
           "submenu": [
             {
               "label": "Jump to Declaration",
