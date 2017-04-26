@@ -13,11 +13,14 @@ function indicatorBar(editor): HTMLElement {
         let resizeSensor = document.createElement('iframe');
         resizeSensor.classList.add('indicator-resize-sensor');
         atom.views.getView(editor).component.domNodeValue.appendChild(resizeSensor);
-        resizeSensor.contentWindow.addEventListener('resize', e => {
-            let positions: Point[] = indicators(editor).map(i => JSON.parse(i.getAttribute('position')));
-            let types = indicators(editor).map(i => i.getAttribute('type'));
-            clearAll(editor);
-            ramda.zip(types, positions).map(([type, pos]) => show(editor, type, pos));
+        Promise.resolve(true)       // 等一下，讓 iframe.contentWindow 長出來
+        .then(_ => {
+            resizeSensor.contentWindow.addEventListener('resize', e => {
+                let positions: Point[] = indicators(editor).map(i => JSON.parse(i.getAttribute('position')));
+                let types = indicators(editor).map(i => i.getAttribute('type'));
+                clearAll(editor);
+                ramda.zip(types, positions).map(([type, pos]) => show(editor, type, pos));
+            });
         });
     }
     return bar;
