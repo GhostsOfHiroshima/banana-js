@@ -21,6 +21,9 @@ function bar(editor): HTMLElement {
 }
 
 function isSameRepo(repoPath: string, filePath: string) {
+    if (! filePath) {
+        return false;
+    }
     let repoRoot = repoPath.replace('.git', '');
     return filePath.indexOf(repoRoot) === 0;
 }
