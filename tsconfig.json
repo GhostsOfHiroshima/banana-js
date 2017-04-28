@@ -6,6 +6,7 @@
     },
     "files": [
         "lib/indicator-bar.ts",
+        "lib/diff-overview.ts",
         "lib/marker.ts",
         "lib/type/node.ts",
         "lib/type/scope.ts",

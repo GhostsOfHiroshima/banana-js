@@ -20,12 +20,28 @@
     background-color: #1d744b;
 }
 
-.indicator-bar {
+.indicator-bar, .diff-overview {
     position: absolute;
     bottom: 15px;
     top: 0px;
     right: 10px;
     width: 10px;
+    &.diff-overview {
+        * {
+            position: absolute;
+            border-right: 2px solid green;
+            width: 10px;
+            &.added {
+                border-color: green;
+            }
+            &.removed {
+                border-color: red;
+            }
+            &.modified {
+                border-color: #e0c285;
+            }
+        }
+    }
 }
 
 .indicator-resize-sensor {
