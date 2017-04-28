@@ -8,9 +8,11 @@
         "lib/indicator-bar.ts",
         "lib/diff-overview.ts",
         "lib/marker.ts",
+        "lib/call-hint.ts",
         "lib/type/node.ts",
         "lib/type/scope.ts",
         "lib/type/property.ts",
+        "lib/type/call-expression.ts",
         "lib/type/identifier.ts"
     ]
 }
