@@ -75,14 +75,9 @@ export function init(editor) {
             });
         });
         editor.onDidChangeCursorPosition(e => {
-            Optional.of(programIn[editor.id])
-            .map(program => {
-                let pos = toEstreePosition(editor.getCursorBufferPosition());
-                if (! inCallArgumentsBlock(program, pos)) {
-                    clear(editor);
-                }
-            })
-            .or_exec(() => clear(editor));
+            if (! e.textChanged) {
+                clear(editor);
+            }
         });
         editor.onDidDestroy(event => clear(editor));
     });
