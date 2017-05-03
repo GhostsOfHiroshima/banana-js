@@ -1,8 +1,8 @@
 import * as ramda from 'ramda';
-import {Node, Identifier} from 'estree';
+import {Node, Identifier, ObjectExpression, AssignmentExpression} from 'estree';
 import {Optional} from '../types';
 import {parent} from './node';
-import {findDefinition} from './identifier';
+import {findDefinition, occurences, isVariable} from './identifier';
 import * as commonjs from './module-type/commonjs';
 import * as es6 from './module-type/es6';
 
@@ -64,12 +64,44 @@ const valueGetters: ValueGetter[] = [
 
     (propertyName, host) => {
         if (host.type === 'ObjectExpression') {
-            let ps = host.properties
-            .filter(p =>
-                (p.key.type === 'Literal' && p.key.value === propertyName) ||
-                (p.key.type === 'Identifier' && p.key.name === propertyName))
-            .map(p => p.value);
-            return Optional.of(ramda.head(ps));
+            const methods = [
+                (propertyName, host: ObjectExpression) => {
+                    let ps = host.properties
+                    .filter(p =>
+                        (p.key.type === 'Literal' && p.key.value === propertyName) ||
+                        (p.key.type === 'Identifier' && p.key.name === propertyName))
+                    .map(p => p.value);
+                    return Optional.of(ramda.head(ps));
+                },
+                (propertyName, host: ObjectExpression) => {
+                    return parent(host)
+                    .chain(p => {
+                        if (p.type === 'VariableDeclarator' && isVariable(p.id)) {
+                            let values = occurences(p.id as Identifier)
+                            .filter(o =>
+                                parent(o)
+                                .chain(parent)
+                                .map(p => p.type === 'AssignmentExpression' &&
+                                    p.operator === '=' &&
+                                    p.left.type === 'MemberExpression' &&
+                                    p.left.property.type === 'Identifier' &&
+                                    p.left.property.name === propertyName)
+                                .or_else(false))
+                            .map(o => parent(o).chain(parent).map((p: AssignmentExpression) => p.right));
+                            return Optional.of(ramda.head(Optional.cat(values)));
+                        } else {
+                            return Optional.empty();
+                        }
+                    });
+                },
+            ];
+            return methods.reduce((result, m) => {
+                if (result.is_present()) {
+                    return result;
+                } else {
+                    return m(propertyName, host);
+                }
+            }, Optional.empty() as Optional<Node>);
         } else {
             return Optional.empty();
         }
