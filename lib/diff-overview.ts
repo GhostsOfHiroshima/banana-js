@@ -52,7 +52,7 @@ function update(editor) {
     const isModified = diff => ! isAdded(diff) && ! isRemoved(diff);
 
     clear(editor);
-    Optional.of(ramda.head(atom.project.getRepositories().filter(repo => isSameRepo(repo.getPath(), editor.getPath()))))
+    Optional.of(ramda.head(atom.project.getRepositories().filter(repo => repo && isSameRepo(repo.getPath(), editor.getPath()))))
     .map(repo => (repo as any).getLineDiffs(editor.getPath(), editor.getText()))
     .map((diffs: any[]) => {
         diffs.filter(isAdded).forEach(diff => set(editor, diff, 'added'));
