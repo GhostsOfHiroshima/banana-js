@@ -14,6 +14,12 @@ apm install banana-js
 
 ![Screenshot-1](https://github.com/leon740727/banana-js/blob/master/resources/screenshot-1.png?raw=true)
 
+* overview the diff block
+
+* function arguments hint
+
+![Screenshot-4](https://github.com/leon740727/banana-js/blob/master/resources/screenshot-4.png?raw=true)
+
 * occurrence of variables just like "Mark Occurrences" in Eclipse
   1. On the right side of editor, we can find out where the identifier appears in the file. (the green line)
   2. Notice the word "team" in different scenarios have different marker
