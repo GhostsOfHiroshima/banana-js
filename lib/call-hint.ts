@@ -5,6 +5,7 @@ import {toEstreePosition} from './atom-position';
 import {descendants} from './type/node';
 import {callExpression, getArguments, inArgumentsBlock as inCallArgumentsBlock} from './type/call-expression';
 import {findDefinition} from './type/identifier';
+const CompositeDisposable = require('atom').CompositeDisposable;
 
 declare let atom;
 
@@ -37,7 +38,8 @@ export function init(editor) {
         editor.emitter.on('did-parse-ok', program => {
             programIn[editor.id] = program;
         });
-        editor.onDidStopChanging(event => {
+        let subscriptions = new CompositeDisposable();
+        subscriptions.add(editor.onDidStopChanging(event => {
             Promise.resolve(null)           // wait for parse
             .then(_ => {
                 Optional.of(programIn[editor.id])
@@ -73,12 +75,15 @@ export function init(editor) {
                     }
                 });
             });
-        });
-        editor.onDidChangeCursorPosition(e => {
+        }));
+        subscriptions.add(editor.onDidChangeCursorPosition(e => {
             if (! e.textChanged) {
                 clear(editor);
             }
-        });
-        editor.onDidDestroy(event => clear(editor));
+        }));
+        subscriptions.add(editor.onDidDestroy(e => {
+            clear(editor);
+            subscriptions.dispose();
+        }));
     });
 }

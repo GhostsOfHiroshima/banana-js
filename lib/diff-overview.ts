@@ -1,12 +1,15 @@
 import * as ramda from 'ramda';
 import {Optional} from './types';
+const CompositeDisposable = require('atom').CompositeDisposable;
 
 declare let atom;
 
 export function init() {
     atom.workspace.observeTextEditors(editor => {
-        editor.onDidStopChanging(e => update(editor));
-        editor.onDidChangePath(e => update(editor));
+        let subscriptions = new CompositeDisposable();
+        subscriptions.add(editor.onDidStopChanging(e => update(editor)));
+        subscriptions.add(editor.onDidChangePath(e => update(editor)));
+        subscriptions.add(editor.onDidDestroy(e => subscriptions.dispose()));
     });
 }
 
