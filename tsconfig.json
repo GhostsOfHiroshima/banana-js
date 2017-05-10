@@ -5,6 +5,7 @@
         "module": "commonjs"
     },
     "files": [
+        "lib/parser.ts",
         "lib/indicator-bar.ts",
         "lib/diff-overview.ts",
         "lib/marker.ts",
