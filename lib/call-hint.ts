@@ -35,10 +35,12 @@ function clear(editor) {
 
 export function init(editor) {
     atom.workspace.observeTextEditors(editor => {
-        editor.emitter.on('did-parse-ok', program => {
-            programIn[editor.id] = program;
-        });
         let subscriptions = new CompositeDisposable();
+
+        subscriptions.add(editor.emitter.on('did-parse-ok', program => {
+            programIn[editor.id] = program;
+        }));
+        
         subscriptions.add(editor.onDidStopChanging(event => {
             Promise.resolve(null)           // wait for parse
             .then(_ => {

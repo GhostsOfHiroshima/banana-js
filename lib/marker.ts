@@ -73,19 +73,19 @@ export function init() {
     atom.workspace.observeTextEditors(editor => {
         let markerManager = new MarkerManager();
         let tokens = [];
+        let subscriptions = new CompositeDisposable();
 
-        editor.emitter.on('did-parse-ok', ast => {
+        subscriptions.add(editor.emitter.on('did-parse-ok', ast => {
             tokens = descendants(ast).filter(isToken);
             markerManager.clear(editor, 'error');
-        });
+        }));
 
-        editor.emitter.on('did-parse-error', error => {
+        subscriptions.add(editor.emitter.on('did-parse-error', error => {
             tokens = [];
             parseErrorToRange(editor, error)
             .map(errorMarker => markerManager.set(editor, 'error', [errorMarker]));
-        });
+        }));
 
-        let subscriptions = new CompositeDisposable();
         subscriptions.add(editor.onDidChangeCursorPosition(e => {
             if (editor.getSelectedText() || this.editing) {
                 return;
