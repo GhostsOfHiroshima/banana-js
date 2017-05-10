@@ -9,10 +9,6 @@ const CompositeDisposable = require('atom').CompositeDisposable;
 
 declare let atom;
 
-let markerIn = {};                    // hint marker in editor
-let markerDecorationIn = {};          // markerDecoration in editor
-let programIn = {};                   // estree program node in editor
-
 function hintElement(editor, text) {
     let hint = document.createElement('div');
     hint.textContent = text;
@@ -22,29 +18,33 @@ function hintElement(editor, text) {
     return container;
 }
 
-function clear(editor) {
-    if (markerIn[editor.id] && markerIn[editor.id].destroy) {
-        markerIn[editor.id].destroy();
-    }
-    if (markerDecorationIn[editor.id] && markerDecorationIn[editor.id].destroy) {
-        markerDecorationIn[editor.id].destroy();
-    }
-    delete markerIn[editor.id];
-    delete markerDecorationIn[editor.id];
-}
-
 export function init(editor) {
+    let marker = null;                    // hint marker
+    let markerDecoration = null;          // markerDecoration
+    let ast = null;                       // estree ast
+
+    function clear() {
+        if (marker && marker.destroy) {
+            marker.destroy();
+        }
+        if (markerDecoration && markerDecoration.destroy) {
+            markerDecoration.destroy();
+        }
+        marker = null;
+        markerDecoration = null;
+    }
+
     atom.workspace.observeTextEditors(editor => {
         let subscriptions = new CompositeDisposable();
 
-        subscriptions.add(editor.emitter.on('did-parse-ok', program => {
-            programIn[editor.id] = program;
+        subscriptions.add(editor.emitter.on('did-parse-ok', _ast => {
+            ast = _ast;
         }));
-        
+
         subscriptions.add(editor.onDidStopChanging(event => {
             Promise.resolve(null)           // wait for parse
             .then(_ => {
-                Optional.of(programIn[editor.id])
+                Optional.of(ast)
                 .map(program => {
                     let pos = toEstreePosition(editor.getCursorBufferPosition());
                     if (inCallArgumentsBlock(program, pos)) {
@@ -66,12 +66,10 @@ export function init(editor) {
                         })
                         .map(args => {
                             if (args.length > 0) {
-                                clear(editor);
+                                clear();
                                 let bufferPosition = editor.getCursorBufferPosition();
-                                let marker = editor.markBufferRange([bufferPosition, bufferPosition]);
-                                let overlay = editor.decorateMarker(marker, {type: 'overlay', item: hintElement(editor, args.join(', ')), position: 'head', class: 'banana-hint'});
-                                markerIn[editor.id] = marker;
-                                markerDecorationIn[editor.id] = overlay;
+                                marker = editor.markBufferRange([bufferPosition, bufferPosition]);
+                                markerDecoration = editor.decorateMarker(marker, {type: 'overlay', item: hintElement(editor, args.join(', ')), position: 'head', class: 'banana-hint'});
                             }
                         });
                     }
@@ -80,11 +78,11 @@ export function init(editor) {
         }));
         subscriptions.add(editor.onDidChangeCursorPosition(e => {
             if (! e.textChanged) {
-                clear(editor);
+                clear();
             }
         }));
         subscriptions.add(editor.onDidDestroy(e => {
-            clear(editor);
+            clear();
             subscriptions.dispose();
         }));
     });
