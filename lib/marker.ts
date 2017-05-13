@@ -99,6 +99,9 @@ export function init() {
                 }
             } else {
                 let word = editor.getWordUnderCursor();
+                if (word.length <= 2) {
+                    return;
+                }
                 if (word.match(/^\w+$/)) {
                     markerManager.set(editor, 'normal', occurenceForWord(editor.getText(), word));
                 } else {
