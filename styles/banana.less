@@ -26,16 +26,20 @@
     top: 0px;
     right: 10px;
     width: 10px;
+    &.indicator-bar {
+        right: 14px;
+    }
     &.diff-overview {
         * {
             position: absolute;
-            border-right: 2px solid green;
+            border-right: 3px solid green;
             width: 10px;
+            min-height: 2px;
             &.added {
                 border-color: green;
             }
             &.removed {
-                border-color: red;
+                border-color: #f977ef;
             }
             &.modified {
                 border-color: #e0c285;
@@ -60,7 +64,7 @@
     border-top: 2px solid green;
     opacity: 0.8;
     &.normal {
-        border-top-color: green;
+        border-top-color: #70a5f9;
     }
     &.error {
         border-top-color: red;
