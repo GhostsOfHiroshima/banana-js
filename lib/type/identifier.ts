@@ -108,7 +108,16 @@ export function findDefinition(identifier: Identifier): Optional<Node> {
                 return Optional.of(host);
             }
         })
-        .chain(host => property.value(identifier.name, host));
+        .chain(host => {
+            return property.value(identifier.name, host)
+            .chain(v => {
+                if (v.type === 'Identifier') {
+                    return findDefinition(v);
+                } else {
+                    return Optional.of(v);
+                }
+            });
+        });
     } else {
         return findDeclaration(identifier)
         .chain(declaration => {
