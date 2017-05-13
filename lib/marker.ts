@@ -87,7 +87,7 @@ export function init() {
         }));
 
         subscriptions.add(editor.onDidChangeCursorPosition(e => {
-            if (editor.getSelectedText() || this.editing) {
+            if (editor.getSelectedText() || e.textChanged) {
                 return;
             }
             if (tokens.length > 0) {
