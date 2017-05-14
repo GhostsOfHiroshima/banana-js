@@ -1,7 +1,7 @@
 {
   "name": "banana-js",
   "main": "./lib/banana",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A JavaScript Editor enhancement",
   "keywords": [],
   "repository": "https://github.com/leon740727/banana-js",
