@@ -1,0 +1,30 @@
+HTML1300: Navigation occurred.
+master (1,1)
+
+CSP14309: Unknown directive 'block-all-mixed-content' in Content-Security-Policy - directive will be ignored.
+
+CSP14309: Unknown directive 'manifest-src' in Content-Security-Policy - directive will be ignored.
+
+CSP14309: Unknown directive 'block-all-mixed-content' in Content-Security-Policy - directive will be ignored.
+
+CSP14309: Unknown directive 'manifest-src' in Content-Security-Policy - directive will be ignored.
+
+2HTML1500: Tag cannot be self-closing. Use an explicit closing tag.
+master (126,135)
+
+HTML1512: Unmatched end tag.
+master (146,43)
+
+HTML1509: Unmatched end tag.
+master (146,52)
+
+HTML1500: Tag cannot be self-closing. Use an explicit closing tag.
+master (175,197)
+
+
+
+
+
+
+
+ 
